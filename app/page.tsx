@@ -6,6 +6,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Send, Activity, Cpu, BrainCircuit, Search, Zap, ExternalLink, Globe, MessageSquare, ShieldCheck, Lock, Unlock, Move, X, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
+// --- DEPLOYMENT FIX: Hugging Face URL definition ---
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://ddibyanshu122-nexus-neural-core.hf.space";
+
 export default function Home() {
   const [topic, setTopic] = useState("");
   const [data, setData] = useState<any>(null);
@@ -69,7 +72,8 @@ export default function Home() {
     setChatHistory([]);
     setIsChatOpen(false); 
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/test-full-workflow`, {
+      // Updated to use dynamic API URL
+      const response = await axios.get(`${API_BASE_URL}/test-full-workflow`, {
         params: { topic: topic, deep: isDeepSearch }
       });
       setData(response.data);
@@ -88,7 +92,8 @@ export default function Home() {
     setChatLoading(true);
     setIsChatOpen(true); 
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/ask-agent`, {
+      // Updated to use dynamic API URL
+      const response = await axios.get(`${API_BASE_URL}/ask-agent`, {
         params: { question: userQ, context: currentResearchTopic }
       });
       setChatHistory(prev => [...prev, { q: userQ, a: response.data.answer }]);
