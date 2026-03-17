@@ -22,12 +22,29 @@ export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const reportTopRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatHistory, chatLoading]);
 
-  // --- REPORT FORMATTING (Fixed Tables & Alignment) ---
+  // --- Effect 1: Chat Scroll ---
+  useEffect(() => { 
+    if (isChatOpen && chatHistory.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
+    }
+  }, [chatHistory.length, chatLoading, isChatOpen]);
+
+  // --- Effect 2: Report Scroll Focus ---
+  useEffect(() => {
+    if (data && !loading) {
+      const timer = setTimeout(() => {
+        reportTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [data, loading]);
+
+  // --- REPORT FORMATTING ---
   const MarkdownComponents = {
     h1: ({children}: any) => <h1 className="text-4xl font-black text-amber-950 mb-8 border-b-4 border-orange-200 pb-4 uppercase tracking-tighter leading-none">{children}</h1>,
     h2: ({children}: any) => <h2 className="text-2xl font-bold text-orange-800 mt-12 mb-6 flex items-center gap-3"><div className="w-2 h-8 bg-orange-500 rounded-full"></div>{children}</h2>,
@@ -72,7 +89,6 @@ export default function Home() {
     setChatHistory([]);
     setIsChatOpen(false); 
     try {
-      // Updated to use dynamic API URL
       const response = await axios.get(`${API_BASE_URL}/test-full-workflow`, {
         params: { topic: topic, deep: isDeepSearch }
       });
@@ -92,7 +108,6 @@ export default function Home() {
     setChatLoading(true);
     setIsChatOpen(true); 
     try {
-      // Updated to use dynamic API URL
       const response = await axios.get(`${API_BASE_URL}/ask-agent`, {
         params: { question: userQ, context: currentResearchTopic }
       });
@@ -106,7 +121,8 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <main className="relative min-h-screen bg-[#f8fafc] text-slate-900 font-sans flex flex-col">
+    // FIX: overflow-hidden jab tak data na ho
+    <main className={`relative h-screen bg-[#f8fafc] text-slate-900 font-sans flex flex-col ${(!data && !loading) ? 'overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}>
       
       {/* 1. FLOATING HEADER */}
       <header className="fixed top-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4">
@@ -130,26 +146,25 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 2. MAIN SCROLLABLE AREA */}
-      <div className="flex-1 w-full pt-28 pb-40 overflow-y-auto px-6 max-w-5xl mx-auto flex flex-col gap-8">
+      {/* 2. MAIN AREA (Fixed Center for Landing) */}
+      <div className={`flex-1 w-full flex flex-col items-center px-6 max-w-5xl mx-auto ${(!data && !loading) ? 'justify-center' : 'pt-28 pb-40'}`}>
         
+        {/* Scroll Anchor */}
+        <div ref={reportTopRef} className="scroll-mt-32" />
+
         {!data && !loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-1000 py-20">
+          <div className="flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in duration-1000 -mt-20">
             <div className="relative">
-              <div className="absolute -inset-8 bg-indigo-500/10 blur-[80px] rounded-full animate-pulse"></div>
-              {/* Brain Blink Effect added below */}
-              <BrainCircuit size={100} className="text-indigo-600 relative animate-pulse" />
+              <div className="absolute -inset-10 bg-indigo-500/15 blur-[100px] rounded-full animate-pulse"></div>
+              <BrainCircuit size={120} className="text-indigo-600 relative animate-pulse" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-5xl font-black tracking-tighter bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-500 bg-clip-text text-transparent uppercase leading-tight">Neural Research Engine</h2>
-              <p className="text-slate-400 font-mono text-xs tracking-[0.4em] uppercase italic">Automating the frontier of knowledge</p>
+            <div className="space-y-4">
+              <h2 className="text-6xl font-black tracking-tighter bg-gradient-to-br from-slate-900 via-indigo-950 to-indigo-500 bg-clip-text text-transparent uppercase leading-tight">Neural Research Engine</h2>
+              <p className="text-slate-400 font-mono text-sm tracking-[0.5em] uppercase italic">Automating the frontier of knowledge</p>
             </div>
           </div>
         ) : (
-          /* CONTENT CONTAINER */
           <div className="w-full bg-white rounded-[2.5rem] border border-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.03)] overflow-hidden min-h-[60vh] flex flex-col">
-            
-            {/* TABS (For Report Only) */}
             {!isChatOpen && (
               <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex gap-8">
                 {['report', 'research', 'critic'].map((tab) => (
@@ -158,7 +173,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* SCROLLABLE CONTENT BODY */}
             <div className="p-10 md:p-16">
               {loading ? (
                 <div className="py-20 flex flex-col items-center justify-center space-y-6">
@@ -168,7 +182,6 @@ export default function Home() {
               ) : (
                 <div className="animate-in fade-in duration-700">
                   {!isChatOpen ? (
-                    /* REPORT VIEW */
                     <div className="max-w-4xl mx-auto">
                       {activeTab === "report" && (
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.final_report}</ReactMarkdown>
@@ -185,7 +198,6 @@ export default function Home() {
                       )}
                     </div>
                   ) : (
-                    /* CHAT VIEW */
                     <div className="flex flex-col gap-8 -m-10 md:-m-16">
                        <div className="px-10 py-6 border-b border-orange-100 bg-orange-50/30 flex items-center justify-between font-black text-[11px] uppercase tracking-widest text-orange-600">
                         <div className="flex items-center gap-3"><MessageSquare size={18} /> Intelligence Stream</div>
@@ -214,7 +226,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* 3. FLOATING FIXED SEARCH BAR */}
+      {/* 3. SEARCH BAR */}
       <div className="fixed bottom-0 left-0 right-0 z-[120] bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/95 to-transparent pt-12 pb-8 px-6">
         <div className="mx-auto max-w-4xl relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-orange-500 rounded-[3rem] blur-xl opacity-10 group-hover:opacity-25 transition duration-1000 group-focus-within:opacity-30"></div>
