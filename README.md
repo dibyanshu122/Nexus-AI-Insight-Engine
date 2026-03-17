@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Nexus Neural | Agentic AI Research Engine
 
-## Getting Started
+**Nexus Neural** is an advanced, multi-agent research intelligence system designed to provide deep-web insights. It automates data gathering, fact-verification, and professional report synthesis using an autonomous agentic workflow.
 
-First, run the development server:
+---
 
+## 🚀 Key Features
+
+- **🔍 Smart Query Refinement:** Automatically corrects typos and expands vague prompts into professional research topics.
+- **🤖 Multi-Agent Workflow:** - **Researcher Agent:** Scrapes real-time data from the web.
+  - **Critic Agent:** Audits research findings for accuracy.
+  - **Writer Agent:** Synthesizes data into structured Markdown reports.
+- **🧠 Hybrid Memory System:** Uses **Pinecone** for vector memory and **Supabase** for persistence.
+- **🌍 Bilingual Intelligence:** Native support for English, Hindi, and Hinglish queries.
+- **📄 Professional Export:** One-click functionality to download research reports as PDFs.
+
+---
+
+## 🛠️ Tech Stack
+
+### **Backend (Python)**
+* FastAPI, LangChain, LangGraph, Groq (Llama 3), Tavily AI, Pinecone, Supabase.
+
+### **Frontend (TypeScript)**
+* Next.js 14, Tailwind CSS, Framer Motion, Lucide React.
+
+---
+
+## 🏗️ Getting Started
+
+First, install dependencies for both layers.
+
+### Frontend Setup
 ```bash
+cd client
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Backend Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+cd server
+pip install -r requirements.txt
+python main.py
