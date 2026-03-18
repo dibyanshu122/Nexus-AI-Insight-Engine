@@ -1,4 +1,5 @@
 🧠 Nexus.Core – Neural Research & Intelligence Engine
+
 Nexus.Core is a multi-agent AI system designed to automate deep research. It doesn't just search the web; it analyzes, critiques, and synthesizes high-quality intelligence reports in real-time. Built with a focus on 2026 Energy & Global Markets, it uses a specialized agentic workflow to ensure data accuracy and professional formatting.
 
 🚀 Key Features
