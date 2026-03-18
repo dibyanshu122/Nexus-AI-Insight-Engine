@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send, Activity, Cpu, BrainCircuit, Search, Zap, ExternalLink, Globe, MessageSquare, ShieldCheck, Lock, Unlock, Move, X, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { useReactToPrint } from "react-to-print"; // 💡 Added for professional PDF
+import { 
+  Send, Activity, Cpu, BrainCircuit, Search, Zap, ExternalLink, Globe, 
+  MessageSquare, ShieldCheck, Lock, Unlock, Move, X, ChevronLeft, 
+  ChevronRight, FileText, Download 
+} from "lucide-react";
 
 // --- DEPLOYMENT FIX: Hugging Face URL definition ---
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://ddibyanshu122-nexus-neural-core.hf.space";
@@ -23,9 +28,16 @@ export default function Home() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const reportTopRef = useRef<HTMLDivElement>(null);
+  const reportPrintRef = useRef<HTMLDivElement>(null); // 💡 Ref for professional PDF logic
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => { setMounted(true); }, []);
+
+  // --- 💡 PROFESSIONAL PDF LOGIC (React-to-Print) ---
+  const handlePrint = useReactToPrint({
+    contentRef: reportPrintRef,
+    documentTitle: `Nexus_Report_${currentResearchTopic.replace(/\s+/g, '_') || 'Intelligence'}`,
+  });
 
   // --- Effect 1: Chat Scroll ---
   useEffect(() => { 
@@ -121,7 +133,6 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    // FIX: overflow-hidden jab tak data na ho
     <main className={`relative h-screen bg-[#f8fafc] text-slate-900 font-sans flex flex-col ${(!data && !loading) ? 'overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}>
       
       {/* 1. FLOATING HEADER */}
@@ -146,10 +157,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 2. MAIN AREA (Fixed Center for Landing) */}
+      {/* 2. MAIN AREA */}
       <div className={`flex-1 w-full flex flex-col items-center px-6 max-w-5xl mx-auto ${(!data && !loading) ? 'justify-center' : 'pt-28 pb-40'}`}>
         
-        {/* Scroll Anchor */}
         <div ref={reportTopRef} className="scroll-mt-32" />
 
         {!data && !loading ? (
@@ -166,10 +176,22 @@ export default function Home() {
         ) : (
           <div className="w-full bg-white rounded-[2.5rem] border border-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.03)] overflow-hidden min-h-[60vh] flex flex-col">
             {!isChatOpen && (
-              <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex gap-8">
-                {['report', 'research', 'critic'].map((tab) => (
-                  <button key={tab} onClick={() => setActiveTab(tab)} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all pb-2 border-b-2 ${activeTab === tab ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{tab}</button>
-                ))}
+              <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                <div className="flex gap-8">
+                  {['report', 'research', 'critic'].map((tab) => (
+                    <button key={tab} onClick={() => setActiveTab(tab)} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all pb-2 border-b-2 ${activeTab === tab ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}>{tab}</button>
+                  ))}
+                </div>
+
+                {/* 💡 PDF DOWNLOAD BUTTON (Using React-to-Print) */}
+                {activeTab === "report" && (
+                  <button 
+                    onClick={() => handlePrint()} 
+                    className="flex items-center gap-2 bg-slate-900 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-md active:scale-95"
+                  >
+                    <Download size={14} /> Download PDF
+                  </button>
+                )}
               </div>
             )}
 
@@ -183,19 +205,22 @@ export default function Home() {
                 <div className="animate-in fade-in duration-700">
                   {!isChatOpen ? (
                     <div className="max-w-4xl mx-auto">
-                      {activeTab === "report" && (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.final_report}</ReactMarkdown>
-                      )}
-                      {activeTab === "research" && (
-                        <div className="bg-emerald-50/20 p-10 rounded-[2rem] border border-emerald-100">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.researcher_output}</ReactMarkdown>
-                        </div>
-                      )}
-                      {activeTab === "critic" && (
-                        <div className="bg-amber-50/20 p-10 rounded-[2rem] border border-amber-100">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.critic_review}</ReactMarkdown>
-                        </div>
-                      )}
+                      {/* 💡 Ref 'reportPrintRef' targetted for the professional PDF area */}
+                      <div ref={reportPrintRef} className="bg-white print:p-12 print:text-black"> 
+                        {activeTab === "report" && (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.final_report}</ReactMarkdown>
+                        )}
+                        {activeTab === "research" && (
+                          <div className="bg-emerald-50/20 p-10 rounded-[2rem] border border-emerald-100">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.researcher_output}</ReactMarkdown>
+                          </div>
+                        )}
+                        {activeTab === "critic" && (
+                          <div className="bg-amber-50/20 p-10 rounded-[2rem] border border-amber-100">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>{data?.critic_review}</ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-8 -m-10 md:-m-16">
