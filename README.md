@@ -71,7 +71,7 @@ npm run dev
 Environment Variables:
 Create a .env file and add your API keys:
 
-GEMINI_API_KEY
+GROQ_API_KEY
 
 TAVILY_API_KEY
 
